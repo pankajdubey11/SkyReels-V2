@@ -48,4 +48,4 @@ ENV RESOLUTION=540P \
     OFFLOAD=1 \
     ALLOW_MULTI_MODEL=0
 
-CMD ["python", "-u", "runpod/handler.py"]
+CMD ["python", "-u", "handler.py"]
