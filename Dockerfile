@@ -44,7 +44,7 @@ RUN python -m pip install einops && \
 COPY requirements.txt /app/requirements.txt
 RUN grep -viE '^(torch==|torchvision==|flash_attn)' /app/requirements.txt > /app/req.trimmed.txt && \
     python -m pip install -r /app/req.trimmed.txt && \
-    python -m pip install runpod pillow
+    python -m pip install runpod pillow decord
 
 # 4) App code (handler.py at repo root; skyreels_v2_infer importable).
 COPY . /app
