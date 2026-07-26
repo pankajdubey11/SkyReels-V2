@@ -26,10 +26,14 @@ RUN python -m pip install --upgrade pip && \
       --index-url https://download.pytorch.org/whl/cu121
 
 # 2) PREBUILT flash-attn wheel (torch2.5 / cu12 / py310 / cxx11abiFALSE).
-#    Downloaded + installed as a file to avoid pip URL '+' parsing issues.
-RUN curl -fSL -o /tmp/flash_attn.whl \
+#    Install einops first, then the wheel with --no-deps so pip's resolver never
+#    touches the already-installed cu121 torch (that resolver step is what failed
+#    the RunPod build). Retry the 244MB download for transient network blips.
+RUN python -m pip install einops && \
+    curl -fSL --retry 4 --retry-delay 5 -o /tmp/flash_attn.whl \
       "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3.post1/flash_attn-2.8.3.post1%2Bcu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl" && \
-    python -m pip install /tmp/flash_attn.whl && rm /tmp/flash_attn.whl
+    test -s /tmp/flash_attn.whl && \
+    python -m pip install --no-deps /tmp/flash_attn.whl && rm /tmp/flash_attn.whl
 
 # 3) Repo requirements minus torch/torchvision/flash_attn (already installed).
 COPY requirements.txt /app/requirements.txt
