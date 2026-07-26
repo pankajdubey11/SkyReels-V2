@@ -29,11 +29,16 @@ RUN python -m pip install --upgrade pip && \
 #    Install einops first, then the wheel with --no-deps so pip's resolver never
 #    touches the already-installed cu121 torch (that resolver step is what failed
 #    the RunPod build). Retry the 244MB download for transient network blips.
+# pip parses version/tags from the wheel FILENAME, so save with the ORIGINAL
+# name (with a literal '+'). Renaming to flash_attn.whl caused
+# "Invalid wheel filename (wrong number of parts)"; -O would keep the URL's
+# encoded '%2B'. So fetch the %2B URL but write the real '+' filename.
 RUN python -m pip install einops && \
-    curl -fSL --retry 4 --retry-delay 5 -o /tmp/flash_attn.whl \
+    curl -fSL --retry 4 --retry-delay 5 \
+      -o "/tmp/flash_attn-2.8.3.post1+cu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl" \
       "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3.post1/flash_attn-2.8.3.post1%2Bcu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl" && \
-    test -s /tmp/flash_attn.whl && \
-    python -m pip install --no-deps /tmp/flash_attn.whl && rm /tmp/flash_attn.whl
+    python -m pip install --no-deps "/tmp/flash_attn-2.8.3.post1+cu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl" && \
+    rm -f /tmp/flash_attn-2.8.3.post1*.whl
 
 # 3) Repo requirements minus torch/torchvision/flash_attn (already installed).
 COPY requirements.txt /app/requirements.txt
