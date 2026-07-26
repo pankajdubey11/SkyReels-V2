@@ -31,6 +31,16 @@ import imageio
 import torch
 from PIL import Image
 
+# torch.compile/inductor tries to gcc-compile CUDA utils linking -lcuda, which
+# fails on RunPod workers where libcuda isn't linkable ->
+# "BackendCompilerFailed: gcc ... -lcuda ... exit status 1". Fall back to eager
+# so inference never dies on a compile issue.
+try:
+    import torch._dynamo
+    torch._dynamo.config.suppress_errors = True
+except Exception:
+    pass
+
 import runpod
 
 from skyreels_v2_infer.modules import download_model

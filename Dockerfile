@@ -55,6 +55,7 @@ ENV RESOLUTION=540P \
     DF_MODEL=Skywork/SkyReels-V2-DF-1.3B-540P \
     PRELOAD=i2v \
     OFFLOAD=1 \
-    ALLOW_MULTI_MODEL=0
+    ALLOW_MULTI_MODEL=0 \
+    TORCHDYNAMO_DISABLE=1
 
 CMD ["python", "-u", "handler.py"]
